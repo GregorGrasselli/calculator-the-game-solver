@@ -28,6 +28,13 @@ replaceHelper a b s
   where la = length a
 
 
+reverseInt :: Int -> Int
+reverseInt = helpReverseInt . show
+  where helpReverseInt s
+          | head s == '-' = negate $ helpReverseInt $ tail s
+          | otherwise     = read $ reverse s
+
+
 data Operation = Operation { applicable :: Int -> Bool
                            , apply :: Int -> Int
                            , representation :: String}
@@ -42,7 +49,7 @@ compileOperation op
   | startsWith '>'   = Operation (const True) (flip div $ 10 ^ numArg) op
   | startsWith '/'   = Operation (\x -> mod x numArg == 0) (flip div $ numArg) op
   | contains op "=>" = Operation (\x -> contains (show x) (fst split)) (replace split) op
-  | op == "reverse"  = Operation (const True) (read . reverse . show) op
+  | op == "reverse"  = Operation (const True) reverseInt op
   | startsWith ':'   = Operation (const True) (read . (++ (show numArg)) . show) op
   where startsWith s = head op == s
         numArg       = read $ tail op
